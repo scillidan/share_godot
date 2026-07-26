@@ -1,0 +1,78 @@
+name: DevDocs
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+    inputs:
+      godot_version:
+        description: 'Godot version'
+        default: '4.6'
+        required: true
+
+env:
+  godot_version: ${{ github.event.inputs.godot_version || '4.6' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v6
+
+    - name: Clone devdocs
+      run: git clone --depth 1 https://github.com/freeCodeCamp/devdocs.git
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+
+    - name: Patch godot scraper for ${{ env.godot_version }}
+      run: |
+        ruby scripts/patch-godot-scraper.rb devdocs ${{ env.godot_version }}
+        grep -A 6 "version '${{ env.godot_version }}'" devdocs/lib/docs/scrapers/godot.rb
+
+    - name: Install devdocs dependencies
+      run: cd devdocs && bundle install
+
+    - name: Generate Godot ${{ env.godot_version }} devdocs
+      run: cd devdocs && bundle exec thor docs:generate godot@${{ env.godot_version }}
+
+    - name: Package
+      run: |
+        godot_v=${{ env.godot_version }}
+        slug_version=$(echo "$godot_v" | tr '.' '_')
+        mv "devdocs/public/docs/godot~${slug_version}/" "godot~${slug_version}/"
+        tar czf "godot-${godot_v}-devdocs.tar.gz" "godot~${slug_version}/"
+
+    - name: Check previous devdocs release
+      id: prev_release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        GODOT_VERSION="${{ env.godot_version }}"
+        TAG_PREFIX="devdocs-${GODOT_VERSION}-"
+        previous_tag=$(gh release list --limit 100 | grep "^${TAG_PREFIX}" | head -1 | awk '{print $1}')
+        echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
+
+    - name: Delete previous devdocs release
+      if: steps.prev_release.outputs.previous_tag != ''
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release delete "${{ steps.prev_release.outputs.previous_tag }}" --yes --cleanup-tag || true
+
+    - name: Create Release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        GODOT_VERSION="${{ env.godot_version }}"
+        DATE=$(date +%Y%m%d)
+        TAG="devdocs-${GODOT_VERSION}-${DATE}"
+        gh release create "$TAG" \
+          "godot-${GODOT_VERSION}-devdocs.tar.gz" \
+          --title "DevDocs ${GODOT_VERSION} (${DATE})" \
+          --notes "Godot ${GODOT_VERSION} documentation in devdocs format"

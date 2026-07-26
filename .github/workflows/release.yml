@@ -160,12 +160,12 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         STABLE_VERSION: ${{ env.stable_version }}
       run: |
-        previous_tag=$(gh release list --limit 100 | grep "^${STABLE_VERSION}-" | head -1 | awk '{print $1}')
+        previous_tag=$(gh release list --limit 100 | grep "^docset-${STABLE_VERSION}-" | head -1 | awk '{print $1}')
         if [[ -n "$previous_tag" ]]; then
           echo "Deleting previous release and tag: $previous_tag"
           gh release delete "$previous_tag" --yes --cleanup-tag || true
         else
-          echo "No previous release found with prefix ${STABLE_VERSION}-"
+          echo "No previous release found with prefix docset-${STABLE_VERSION}-"
         fi
 
     - name: Create GitHub Release
@@ -178,8 +178,8 @@ jobs:
         OWNER: ${{ env.upstream_owner }}
         REPO: ${{ env.upstream_repo }}
       run: |
-        TAG="${STABLE_VERSION}-${RUN_DATE}"
-        TITLE="${STABLE_VERSION} (${RUN_DATE})"
+        TAG="docset-${STABLE_VERSION}-${RUN_DATE}"
+        TITLE="Docset ${STABLE_VERSION} (${RUN_DATE})"
         gh release create "$TAG" \
           Godot_master.tgz \
           Godot_${{ env.stable_version }}.tgz \
@@ -193,7 +193,7 @@ jobs:
         STABLE_VERSION: ${{ env.stable_version }}
         RUN_DATE: ${{ steps.upstream_run.outputs.run_date }}
       run: |
-        TAG="${STABLE_VERSION}-${RUN_DATE}"
+        TAG="docset-${STABLE_VERSION}-${RUN_DATE}"
         echo "<entry>" > Godot.xml
         echo "  <name>Godot</name>" >> Godot.xml
         echo "  <version>${{ env.stable_version }}</version>" >> Godot.xml

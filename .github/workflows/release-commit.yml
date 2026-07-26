@@ -84,21 +84,18 @@ jobs:
     - name: Delete existing release if tag exists
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COMMIT_TAG: ${{ env.stable_version }}
+        COMMIT_TAG: docset-${{ env.stable_version }}
       run: |
-        gh release delete "$COMMIT_TAG" --yes || true
-        git tag -d "$COMMIT_TAG" || true
-        git push origin ":refs/tags/$COMMIT_TAG" || true
-
+        gh release delete "$COMMIT_TAG" --yes --cleanup-tag || true
     - name: Create GitHub Release (Build from commit)
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COMMIT_TAG: ${{ env.stable_version }}
+        COMMIT_TAG: docset-${{ env.stable_version }}
         COMMIT: ${{ github.event.inputs.source_commit }}
       run: |
         tgz_name="Godot_${{ env.stable_version }}.tgz"
         gh release create "$COMMIT_TAG" \
           "$tgz_name" \
           checksums.txt \
-          --title "${{ env.stable_version }} (build from commit)" \
+          --title "Docset ${{ env.stable_version }} (build from commit)" \
           --notes "Built docset from godotengine/godot-docs@$COMMIT"
