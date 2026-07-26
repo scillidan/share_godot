@@ -45,21 +45,14 @@ jobs:
         curl -sI "https://docs.godotengine.org/en/4.6/classes/index.html" | head -5
 
     - name: Generate Godot ${{ env.godot_version }} devdocs
-      run: cd devdocs && bundle exec thor docs:generate godot@${{ env.godot_version }} --force --verbose --debug
+      run: cd devdocs && bundle exec thor docs:generate godot@${{ env.godot_version }} --force
       timeout-minutes: 30
-
-    - name: List output
-      run: |
-        echo "=== devdocs/public/docs/ ==="
-        find devdocs/public/docs/ -type f -name "*.json" 2>/dev/null || echo "(empty)"
-        find devdocs/public/docs/ -type d 2>/dev/null
 
     - name: Package
       run: |
         godot_v=${{ env.godot_version }}
-        slug_version=$(echo "$godot_v" | tr '.' '_')
-        mv "devdocs/public/docs/godot~${slug_version}/" "godot~${slug_version}/"
-        tar czf "godot-${godot_v}-devdocs.tar.gz" "godot~${slug_version}/"
+        mv "devdocs/public/docs/godot~${godot_v}/" "godot~${godot_v}/"
+        tar czf "godot-${godot_v}-devdocs.tar.gz" "godot~${godot_v}/"
 
     - name: Check previous devdocs release
       id: prev_release
