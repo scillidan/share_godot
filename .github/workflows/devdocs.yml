@@ -52,7 +52,7 @@ jobs:
       run: |
         godot_v=${{ env.godot_version }}
         mv "devdocs/public/docs/godot~${godot_v}/" "godot~${godot_v}/"
-        tar czf "godot-${godot_v}-devdocs.tar.gz" "godot~${godot_v}/"
+        tar czf "godot-${godot_v}.tar.gz" "godot~${godot_v}/"
 
     - name: Create Release
       env:
@@ -62,6 +62,6 @@ jobs:
         TAG="devdocs-${GODOT_VERSION}"
         gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
         gh release create "$TAG" \
-          "godot-${GODOT_VERSION}-devdocs.tar.gz" \
+          "godot-${GODOT_VERSION}.tar.gz" \
           --title "DevDocs ${GODOT_VERSION}" \
           --notes "Godot ${GODOT_VERSION} documentation in devdocs format"
