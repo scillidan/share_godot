@@ -197,12 +197,12 @@ jobs:
         echo "<entry>" > Godot.xml
         echo "  <name>Godot</name>" >> Godot.xml
         echo "  <version>${{ env.stable_version }}</version>" >> Godot.xml
-        echo "  <url>https://github.com/scillidan/share_godot_docset/releases/download/$TAG/Godot_${{ env.stable_version }}.tgz</url>" >> Godot.xml
+        echo "  <url>https://github.com/scillidan/share_godot/releases/download/$TAG/Godot_${{ env.stable_version }}.tgz</url>" >> Godot.xml
         echo "</entry>" >> Godot.xml
         echo "<entry>" > Godot3.xml
         echo "  <name>Godot</name>" >> Godot3.xml
         echo "  <version>3.6</version>" >> Godot3.xml
-        echo "  <url>https://github.com/scillidan/share_godot_docset/releases/download/$TAG/Godot_3.6.tgz</url>" >> Godot3.xml
+        echo "  <url>https://github.com/scillidan/share_godot/releases/download/$TAG/Godot_3.6.tgz</url>" >> Godot3.xml
         echo "</entry>" >> Godot3.xml
 
     - name: Upload XML files
