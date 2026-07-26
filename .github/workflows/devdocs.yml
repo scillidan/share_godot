@@ -54,31 +54,14 @@ jobs:
         mv "devdocs/public/docs/godot~${godot_v}/" "godot~${godot_v}/"
         tar czf "godot-${godot_v}-devdocs.tar.gz" "godot~${godot_v}/"
 
-    - name: Check previous devdocs release
-      id: prev_release
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        GODOT_VERSION="${{ env.godot_version }}"
-        TAG_PREFIX="devdocs-${GODOT_VERSION}-"
-        previous_tag=$(gh release list --limit 100 | grep "^${TAG_PREFIX}" | head -1 | awk '{print $1}')
-        echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
-
-    - name: Delete previous devdocs release
-      if: steps.prev_release.outputs.previous_tag != ''
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        gh release delete "${{ steps.prev_release.outputs.previous_tag }}" --yes --cleanup-tag || true
-
     - name: Create Release
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         GODOT_VERSION="${{ env.godot_version }}"
-        DATE=$(date +%Y%m%d)
-        TAG="devdocs-${GODOT_VERSION}-${DATE}"
+        TAG="devdocs-${GODOT_VERSION}"
+        gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
         gh release create "$TAG" \
           "godot-${GODOT_VERSION}-devdocs.tar.gz" \
-          --title "DevDocs ${GODOT_VERSION} (${DATE})" \
+          --title "DevDocs ${GODOT_VERSION}" \
           --notes "Godot ${GODOT_VERSION} documentation in devdocs format"
