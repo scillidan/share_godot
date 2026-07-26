@@ -37,8 +37,22 @@ jobs:
         ruby scripts/patch-godot-scraper.rb devdocs ${{ env.godot_version }}
         grep -A 6 "version '${{ env.godot_version }}'" devdocs/lib/docs/scrapers/godot.rb
 
+    - name: Verify setup
+      run: |
+        echo "=== Patched scraper file (first look) ==="
+        grep -B 2 -A 6 "version '${{ env.godot_version }}'" devdocs/lib/docs/scrapers/godot.rb
+        echo "=== Test fetching godot 4.6 docs ==="
+        curl -sI "https://docs.godotengine.org/en/4.6/classes/index.html" | head -5
+
     - name: Generate Godot ${{ env.godot_version }} devdocs
-      run: cd devdocs && bundle exec thor docs:generate godot@${{ env.godot_version }} --force
+      run: cd devdocs && bundle exec thor docs:generate godot@${{ env.godot_version }} --force --verbose --debug
+      timeout-minutes: 30
+
+    - name: List output
+      run: |
+        echo "=== devdocs/public/docs/ ==="
+        find devdocs/public/docs/ -type f -name "*.json" 2>/dev/null || echo "(empty)"
+        find devdocs/public/docs/ -type d 2>/dev/null
 
     - name: Package
       run: |
