@@ -28,15 +28,14 @@ jobs:
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.2'
+        ruby-version: '4.0.5'
+        bundler-cache: true
+        working-directory: ./devdocs
 
     - name: Patch godot scraper for ${{ env.godot_version }}
       run: |
         ruby scripts/patch-godot-scraper.rb devdocs ${{ env.godot_version }}
         grep -A 6 "version '${{ env.godot_version }}'" devdocs/lib/docs/scrapers/godot.rb
-
-    - name: Install devdocs dependencies
-      run: cd devdocs && bundle install
 
     - name: Generate Godot ${{ env.godot_version }} devdocs
       run: cd devdocs && bundle exec thor docs:generate godot@${{ env.godot_version }}
