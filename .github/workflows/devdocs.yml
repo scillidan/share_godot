@@ -38,7 +38,7 @@ jobs:
         grep -A 6 "version '${{ env.godot_version }}'" devdocs/lib/docs/scrapers/godot.rb
 
     - name: Generate Godot ${{ env.godot_version }} devdocs
-      run: cd devdocs && bundle exec thor docs:generate godot@${{ env.godot_version }}
+      run: cd devdocs && bundle exec thor docs:generate godot@${{ env.godot_version }} --force
 
     - name: Package
       run: |
