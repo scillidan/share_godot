@@ -1,4 +1,4 @@
-name: Release (build from commit)
+name: Docset (build from commit)
 
 on:
   workflow_dispatch:
