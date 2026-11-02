@@ -111,8 +111,8 @@ jobs:
         cd ..
         for folder in artifacts/godot-docs-html-*; do
           base_folder=$(basename "$folder")
-          echo "Copying $folder to workspace root as $base_folder"
-          cp -r "$folder" "$base_folder"
+          echo "Moving $folder to workspace root as $base_folder"
+          mv "$folder" "$base_folder"
         done
 
     - name: Rename folder
@@ -129,6 +129,8 @@ jobs:
           fi
           doc2dash --icon assets/icon.png --icon-2x assets/icon@2x.png --name "Godot_${name_branch}" -f "$folder"
         done
+        # docsets are built; drop the raw HTML so the archives fit on the runner's disk
+        rm -rf godot-docs-html-*
 
     - name: Update info.plist and rename docset
       run: |
